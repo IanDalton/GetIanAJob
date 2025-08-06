@@ -1,11 +1,10 @@
 import React from 'react';
-
 const Navbar = () => (
   <nav className="bg-red-800 text-white dark:bg-gray-800 dark:text-gray-200 shadow-md p-4 fixed top-0 w-full z-50">
     <div className="container mx-auto flex justify-between items-center">
       <a href="#" className="flex items-center space-x-2">
         <img
-          src="https://via.placeholder.com/40x40/FFFFFF/000000?text=Logo"
+          src="/favicon.ico"
           alt="Logo"
           className="h-8 w-8 rounded-full"
         />
