@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Better Resume Builder</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #2d2d2d; }
+    ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #777; }
+    .drag-over { border: 2px dashed #f87171; }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-200 p-8">
+  <div class="container mx-auto px-4">
+    <h1 class="text-4xl font-bold mb-8 text-center text-red-500">Better Resume Builder</h1>
+
+    <!-- Entry Form -->
+    <div class="bg-gray-800 shadow-xl rounded-2xl p-8 mb-12">
+      <h2 class="text-3xl font-semibold text-gray-100 border-b border-gray-700 pb-3 mb-6">Add Entry</h2>
+      <form id="resumeForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Type -->
+        <div>
+          <label for="type" class="block text-sm font-medium text-gray-300">Type</label>
+          <select id="type" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-lg p-3 focus:ring-red-500 focus:border-red-500">
+            <option value="info">Personal Info</option>
+            <option value="education">Education</option>
+            <option value="job">Job</option>
+            <option value="non-profit">Non-Profit</option>
+            <option value="project">Project</option>
+            <option value="contract">Contract</option>
+            <option value="part-time">Part-Time</option>
+          </select>
+        </div>
+        <!-- Company -->
+        <div id="companyField">
+          <label for="company" class="block text-sm font-medium text-gray-300">Company</label>
+          <input type="text" id="company" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-lg p-3 focus:ring-red-500 focus:border-red-500" placeholder="e.g. Acme Corp">
+        </div>
+        <!-- Location -->
+        <div id="locationField">
+          <label for="location" class="block text-sm font-medium text-gray-300">Location</label>
+          <input type="text" id="location" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-lg p-3 focus:ring-red-500 focus:border-red-500" placeholder="City, Country">
+        </div>
+        <!-- Role -->
+        <div id="roleField">
+          <label for="role" class="block text-sm font-medium text-gray-300">Role</label>
+          <div id="roleInputContainer" class="mt-1"></div>
+        </div>
+        <!-- Dates -->
+        <div id="startDateField">
+          <label for="start_date" class="block text-sm font-medium text-gray-300">Start Date</label>
+          <input type="text" id="start_date" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-lg p-3 focus:ring-red-500 focus:border-red-500" placeholder="MM/YYYY">
+        </div>
+        <div id="endDateField">
+          <label for="end_date" class="block text-sm font-medium text-gray-300">End Date</label>
+          <input type="text" id="end_date" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-lg p-3 focus:ring-red-500 focus:border-red-500" placeholder="MM/YYYY or Present">
+        </div>
+        <!-- Description -->
+        <div class="md:col-span-2 lg:col-span-3">
+          <label for="description" class="block text-sm font-medium text-gray-300">Description</label>
+          <textarea id="description" rows="4" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-lg p-3 focus:ring-red-500 focus:border-red-500" placeholder="Details..."></textarea>
+        </div>
+        <!-- Extra Details -->
+        <div id="roleDescriptionField" class="md:col-span-2 lg:col-span-3 hidden">
+          <label for="role_description" class="block text-sm font-medium text-gray-300">Extra Details</label>
+          <textarea id="role_description" rows="3" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-lg p-3 focus:ring-red-500 focus:border-red-500" placeholder="When applicable..."></textarea>
+        </div>
+        <!-- Buttons -->
+        <div class="md:col-span-2 lg:col-span-3 text-right space-x-4">
+          <button type="button" id="addEntryButton" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-5 rounded-lg">Add Entry</button>
+          <button type="button" id="updateEntryButton" class="hidden bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-5 rounded-lg">Update Entry</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Personal Info Section -->
+    <div id="personalInfoSection" class="hidden mb-8">
+      <h2 class="text-3xl font-semibold text-white border-b border-blue-600 pb-3 mb-6">Personal Info</h2>
+      <div id="personalInfoContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- Experience Section -->
+    <div id="experienceSection" class="hidden">
+      <h2 class="text-3xl font-semibold text-gray-100 border-b border-gray-700 pb-3 mb-6">Experience</h2>
+      <div id="experienceContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const typeSelect = document.getElementById('type');
+      const companyField = document.getElementById('companyField');
+      const locationField = document.getElementById('locationField');
+      const startDateField = document.getElementById('startDateField');
+      const endDateField = document.getElementById('endDateField');
+      const roleInputContainer = document.getElementById('roleInputContainer');
+      const descriptionInput = document.getElementById('description');
+      const roleDescField = document.getElementById('roleDescriptionField');
+      const roleDescInput = document.getElementById('role_description');
+      const personalSection = document.getElementById('personalInfoSection');
+      const expSection = document.getElementById('experienceSection');
+      const personalContainer = document.getElementById('personalInfoContainer');
+      const expContainer = document.getElementById('experienceContainer');
+      const addBtn = document.getElementById('addEntryButton');
+      const updateBtn = document.getElementById('updateEntryButton');
+
+      let data = [];
+      let editIndex = -1;
+      let dragSrcIndex = null;
+
+      function handleRoleChange() {
+        const roleEl = document.getElementById('role');
+        roleDescField.style.display = roleEl.value === 'website' ? 'block' : 'none';
+      }
+
+      function setupForm() {
+        const type = typeSelect.value;
+        [companyField, locationField, startDateField, endDateField].forEach(el => {
+          el.style.display = type === 'info' ? 'none' : 'block';
+        });
+        roleInputContainer.innerHTML = '';
+        if (type === 'info') {
+          const select = document.createElement('select');
+          select.id = 'role';
+          select.className = 'w-full bg-gray-700 border-gray-600 rounded-lg p-3';
+          ['name','email','phone','website','address'].forEach(val => {
+            const opt = document.createElement('option'); opt.value = val; opt.textContent = val.charAt(0).toUpperCase()+val.slice(1); select.appendChild(opt);
+          });
+          select.addEventListener('change', handleRoleChange);
+          roleInputContainer.appendChild(select);
+        } else {
+          const inp = document.createElement('input'); inp.id = 'role'; inp.placeholder = 'Your role'; inp.className = 'w-full bg-gray-700 border-gray-600 rounded-lg p-3'; inp.addEventListener('input', handleRoleChange); roleInputContainer.appendChild(inp);
+        }
+        handleRoleChange();
+      }
+
+      descriptionInput.addEventListener('input', () => {
+        const roleEl = document.getElementById('role');
+        if (roleEl.value === 'website') {
+          const match = descriptionInput.value.match(/https?:\/\/(?:www\.)?([^\/\s]+)/i);
+          if (match) {
+            const parts = match[1].split('.'); roleDescInput.value = parts.length > 1 ? parts[parts.length-2] : parts[0];
+          }
+        }
+      });
+
+      function getIcon(key, value) { return ''; /* icons omitted */ }
+
+      function clearForm() {
+        const cur = typeSelect.value; document.getElementById('resumeForm').reset(); typeSelect.value = cur; editIndex = -1; addBtn.classList.remove('hidden'); updateBtn.classList.add('hidden'); setupForm(); }
+
+      function onDragStart(e) { dragSrcIndex = +e.currentTarget.dataset.index; e.dataTransfer.effectAllowed = 'move'; }
+      function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+      function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+      function onDrop(e) {
+        e.stopPropagation(); e.currentTarget.classList.remove('drag-over'); const destIndex = +e.currentTarget.dataset.index;
+        if (dragSrcIndex !== null && dragSrcIndex !== destIndex) { const [moved] = data.splice(dragSrcIndex, 1); data.splice(destIndex, 0, moved); renderData(); } dragSrcIndex = null;
+      }
+
+      function renderData() {
+        personalContainer.innerHTML = ''; expContainer.innerHTML = ''; personalSection.classList.add('hidden'); expSection.classList.add('hidden');
+        data.forEach((item, idx) => {
+          const isInfo = item.type === 'info'; const container = isInfo ? personalContainer : expContainer; const section = isInfo ? personalSection : expSection; section.classList.remove('hidden');
+          const card = document.createElement('div'); card.className = isInfo ? 'bg-blue-600 border-l-4 border-red-300 rounded-2xl p-6 shadow-md space-y-3' : 'bg-gray-600 rounded-2xl p-6 shadow-md space-y-3';
+          if (isInfo) { card.setAttribute('draggable','true'); card.dataset.index = idx; card.addEventListener('dragstart', onDragStart); card.addEventListener('dragover', onDragOver); card.addEventListener('dragleave', onDragLeave); card.addEventListener('drop', onDrop); }
+          Object.entries(item).forEach(([k,v]) => { if (!v) return; const p = document.createElement('p'); p.className = 'text-gray-200'; const icon = getIcon(k,v); const label = `<span class="font-semibold text-white">${k.charAt(0).toUpperCase()+k.slice(1)}:</span>`; p.innerHTML = `${icon} ${label} ${v}`; card.appendChild(p); });
+          const actions = document.createElement('div'); actions.className = 'flex justify-end space-x-2'; const editBtn = document.createElement('button'); editBtn.innerHTML = '✏️'; editBtn.onclick = () => {/* edit omitted */}; const delBtn = document.createElement('button'); delBtn.innerHTML = '❌'; delBtn.onclick = () => { data.splice(idx,1); renderData(); }; actions.append(editBtn, delBtn); card.appendChild(actions); container.appendChild(card);
+        });
+      }
+
+      addBtn.addEventListener('click', () => {
+        const entry = {
+          type: typeSelect.value,
+          company: document.getElementById('company').value,
+          location: document.getElementById('location').value,
+          role: document.getElementById('role').value,
+          start: document.getElementById('start_date').value,
+          end: document.getElementById('end_date').value,
+          description: descriptionInput.value,
+          role_description: roleDescInput.value
+        };
+        if (editIndex >= 0) data[editIndex] = entry; else data.push(entry);
+        clearForm(); renderData();
+      });
+
+      updateBtn.addEventListener('click', () => addBtn.click());
+      setupForm(); typeSelect.addEventListener('change', setupForm);
+    });
+  </script>
+</body>
+</html>
