@@ -1,3 +1,9 @@
+export function generateStaticParams() {
+  return [
+    { name: "my-first-blog-post" },
+    { name: "exploring-specific-topic" }
+  ];
+}
 "use client";
 import React from "react";
 import { useParams } from "next/navigation";
